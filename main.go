@@ -13,7 +13,8 @@ import (
 
 func main() {
 	db.Connect()
-	db.DB.AutoMigrate(&models.User{}, &models.ChatSession{}, &models.Chat{})
+	db.DB.AutoMigrate(&models.User{}, &models.ChatSession{}, &models.Chat{}, &models.SubscriptionPlan{}, &models.Subscription{})
+	db.SeedSubscriptionPlans()
 
 	r := gin.Default()
 
@@ -39,6 +40,8 @@ func main() {
 	api := r.Group("/api")
 	{
 		api.POST("/auth/login", handlers.Login)
+		api.GET("/subscriptions/plans", handlers.GetPlans)
+		api.POST("/subscriptions/webhook", handlers.StripeWebhook)
 
 		protected := api.Group("/")
 		protected.Use(middleware.AuthMiddleware())
@@ -49,6 +52,9 @@ func main() {
 			protected.GET("/chat/sessions", handlers.GetChatSessions)
 			protected.GET("/chat/sessions/:id/messages", handlers.GetChatMessages)
 			protected.POST("/chat/sessions/:id/messages", handlers.SendMessage)
+
+			protected.GET("/subscriptions/status", handlers.GetSubscriptionStatus)
+			protected.POST("/subscriptions/checkout", handlers.CreateCheckout)
 		}
 	}
 
