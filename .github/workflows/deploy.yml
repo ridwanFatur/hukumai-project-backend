@@ -65,6 +65,7 @@ jobs:
               --restart always \
               -p 8080:8080 \
               --env-file ~/.env \
+              -v ~/.env:/app/.env:ro \
               us-central1-docker.pkg.dev/ridwan-faturrahman/hukumai-repo/api-hukumai-app:latest
 
             docker image prune -f
