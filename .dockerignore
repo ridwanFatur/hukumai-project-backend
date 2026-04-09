@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Local configs & env
+.env
+.env.*
+
+# Temp and build artifacts
+tmp/
+*.tmp
+*.log
+air.log
+
+# Local development tools
+.vscode/
+.idea/
+.air.toml
+
+# Go modules cache (optional)
+bin/
+dist/
+build/
+
+# OS files
+.DS_Store
+Thumbs.db

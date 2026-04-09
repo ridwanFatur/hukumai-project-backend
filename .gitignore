@@ -1,0 +1,40 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build artifacts
+/bin/
+/build/
+/dist/
+*.out
+
+# Go modules cache (optional, biasanya tidak perlu)
+# /vendor/
+
+# IDE / Editor files
+.vscode/
+.idea/
+*.swp
+
+# Air (live reload) temporary files
+.tmp/
+air.log
+
+# Temp folders
+tmp/
+*.tmp
+
+# Environment variables
+.env
+.env.*
+!env.example
+
+# Logs
+*.log
+
+# OS-specific
+.DS_Store
+Thumbs.db
