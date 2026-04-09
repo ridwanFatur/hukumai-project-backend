@@ -13,8 +13,8 @@ import (
 	"github.com/ridwanFatur/hukumai-project-backend/db"
 	"github.com/ridwanFatur/hukumai-project-backend/models"
 	"github.com/stripe/stripe-go/v82"
-	stripeCustomer "github.com/stripe/stripe-go/v82/customer"
 	stripeSession "github.com/stripe/stripe-go/v82/checkout/session"
+	stripeCustomer "github.com/stripe/stripe-go/v82/customer"
 	"github.com/stripe/stripe-go/v82/webhook"
 )
 
@@ -103,15 +103,15 @@ func GetSubscriptionStatus(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"subscription": gin.H{
-			"id":                    sub.ID,
-			"plan_slug":             sub.Plan.Slug,
-			"plan_name":             sub.Plan.Name,
-			"plan_price":            sub.Plan.Price,
-			"features":              features,
-			"status":                sub.Status,
+			"id":                     sub.ID,
+			"plan_slug":              sub.Plan.Slug,
+			"plan_name":              sub.Plan.Name,
+			"plan_price":             sub.Plan.Price,
+			"features":               features,
+			"status":                 sub.Status,
 			"stripe_subscription_id": sub.StripeSubscriptionID,
-			"current_period_start":  sub.CurrentPeriodStart,
-			"current_period_end":    sub.CurrentPeriodEnd,
+			"current_period_start":   sub.CurrentPeriodStart,
+			"current_period_end":     sub.CurrentPeriodEnd,
 		},
 	})
 }
@@ -200,7 +200,12 @@ func StripeWebhook(c *gin.Context) {
 	sig := c.GetHeader("Stripe-Signature")
 	webhookSecret := os.Getenv("STRIPE_WEBHOOK_SECRET")
 
-	event, err := webhook.ConstructEvent(payload, sig, webhookSecret)
+	event, err := webhook.ConstructEventWithOptions(payload, sig, webhookSecret,
+		webhook.ConstructEventOptions{
+			IgnoreAPIVersionMismatch: true,
+		},
+	)
+
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Stripe signature tidak valid"})
 		return
