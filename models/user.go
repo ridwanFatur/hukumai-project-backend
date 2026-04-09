@@ -8,10 +8,11 @@ import (
 
 // User represents a user in the system
 type User struct {
-	ID        uint           `gorm:"primaryKey"`           // Auto increment primary key
-	Email     string         `gorm:"uniqueIndex;not null"` // Unique & required
-	Name      string         `gorm:"size:100"`             // Optional name
-	CreatedAt time.Time      // Auto-set by GORM
-	UpdatedAt time.Time      // Auto-set by GORM
-	DeletedAt gorm.DeletedAt `gorm:"index"` // Soft delete
+	ID        uint           `gorm:"primaryKey" json:"id"`
+	ClerkID   string         `gorm:"uniqueIndex;size:255" json:"clerk_id"`
+	Email     string         `gorm:"uniqueIndex;not null" json:"email"`
+	Name      string         `gorm:"size:100" json:"name"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
