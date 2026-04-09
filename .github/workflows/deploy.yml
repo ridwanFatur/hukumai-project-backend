@@ -66,11 +66,6 @@ jobs:
               -p 8080:8080 \
               --env-file ~/env.backend.prod \
               us-central1-docker.pkg.dev/ridwan-faturrahman/hukumai-repo/api-hukumai-app:latest
-          EOF
-          
-      - name: Clean
-        run: |          
-          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} << 'EOF'
-            rm -f env.backend.prod
+
             docker image prune -f
-          EOF          
+          EOF         
