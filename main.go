@@ -55,6 +55,8 @@ func main() {
 
 			protected.GET("/subscriptions/status", handlers.GetSubscriptionStatus)
 			protected.POST("/subscriptions/checkout", handlers.CreateCheckout)
+
+			protected.POST("/upload", handlers.UploadDocument)
 		}
 	}
 
