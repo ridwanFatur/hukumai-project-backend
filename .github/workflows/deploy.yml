@@ -68,4 +68,4 @@ jobs:
               us-central1-docker.pkg.dev/ridwan-faturrahman/hukumai-repo/api-hukumai-app:latest
 
             docker image prune -f
-          EOF         
+          EOF
