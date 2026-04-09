@@ -1,0 +1,76 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - prod
+
+jobs:
+  deploy-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATEKEY }}
+
+      - name: Add GCE VM to known hosts
+        run: ssh-keyscan -H ${{ secrets.VM_IP }} >> ~/.ssh/known_hosts
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ridwan-faturrahman
+          version: 'latest'
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev
+
+      - name: Build Docker image
+        run: |
+          IMAGE_NAME=us-central1-docker.pkg.dev/ridwan-faturrahman/hukumai-repo/api-hukumai-app
+          IMAGE_TAG=${GITHUB_SHA::7}
+          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:$IMAGE_TAG .
+
+      - name: Push Docker image
+        run: |
+          IMAGE_NAME=us-central1-docker.pkg.dev/ridwan-faturrahman/hukumai-repo/api-hukumai-app
+          IMAGE_TAG=${GITHUB_SHA::7}
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:$IMAGE_TAG
+
+      - name: VM Pull Docker Image
+        run: |          
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} << 'EOF'
+            gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+            docker pull us-central1-docker.pkg.dev/ridwan-faturrahman/hukumai-repo/api-hukumai-app:latest
+          EOF
+
+      - name: Docker Run
+        run: |          
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} << 'EOF'
+            docker stop api-hukumai || true
+            docker rm api-hukumai || true
+
+            docker run -d \
+              --name api-hukumai \
+              --restart always \
+              -p 8080:8080 \
+              --env-file ~/env.backend.prod \
+              us-central1-docker.pkg.dev/ridwan-faturrahman/hukumai-repo/api-hukumai-app:latest
+          EOF
+          
+      - name: Clean
+        run: |          
+          ssh ${{ secrets.VM_USER }}@${{ secrets.VM_IP }} << 'EOF'
+            rm -f env.backend.prod
+            docker image prune -f
+          EOF          
