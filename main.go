@@ -13,7 +13,7 @@ import (
 
 func main() {
 	db.Connect()
-	db.DB.AutoMigrate(&models.User{})
+	db.DB.AutoMigrate(&models.User{}, &models.ChatSession{}, &models.Chat{})
 
 	r := gin.Default()
 
@@ -33,6 +33,9 @@ func main() {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
+	// WebSocket endpoint — auth is handled inside the handler via query param
+	r.GET("/ws", handlers.WebSocketConnect)
+
 	api := r.Group("/api")
 	{
 		api.POST("/auth/login", handlers.Login)
@@ -41,6 +44,11 @@ func main() {
 		protected.Use(middleware.AuthMiddleware())
 		{
 			protected.GET("/users/me", handlers.GetMe)
+
+			protected.POST("/chat/sessions", handlers.CreateChatSession)
+			protected.GET("/chat/sessions", handlers.GetChatSessions)
+			protected.GET("/chat/sessions/:id/messages", handlers.GetChatMessages)
+			protected.POST("/chat/sessions/:id/messages", handlers.SendMessage)
 		}
 	}
 
